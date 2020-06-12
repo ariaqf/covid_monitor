@@ -27,9 +27,9 @@ class Regressor:
     def specific_defaults(self):
         pass
         
-    def select_training_test_data(self, identifier = ''):
+    def select_training_test_data(self):
         self.training_test_set = {}
-        self.current_identifier = identifier
+        self.current_identifier = self.identifier
         for country_name in self.dataset.keys():
             country = self.dataset.get(country_name)
             data = country.get(identifier)
@@ -40,7 +40,7 @@ class Regressor:
                 self.training_test_set[country_name] = data
                 
       
-    def test_fit(self, data, country_name=""):
+    def test_fit(self, data):
         result = False
         if len(data) >= self.minimum_days and data[-1] > self.minimum_last_value:
             previous_variation = 0
