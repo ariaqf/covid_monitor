@@ -1,13 +1,17 @@
 import numpy as np
 import datetime
+import os
+
+import data_downloader
 
 class PreProcessor:
-    def __init__(self, file_name = None, data_identifiers = None, blacklist = None, whitelist = None):
+    def __init__(self, file_name = None, data_identifiers = None, blacklist = None, whitelist = None, filter_date = True):
         self.defaults()
         if(file_name != None):
             self.file_name = file_name
         if(data_identifiers != None):
             self.data_identifiers = data_identifiers
+        self.filter_date = filter_date
         self.blacklist = blacklist
         self.whitelist = whitelist
 
@@ -44,16 +48,22 @@ class PreProcessor:
 
 
     def filter_range(self, data, country, identity):
-        date_filters = (data['location'] == country) & (data[identity] > 0)
-        dates = data[date_filters]['date']
-        selected_range = np.array([])
-        if len(dates) != 0:
-            first_date = dates[0]
-            filters = (data['location'] == country) & (data['date'] > first_date)
-            selected_range = data[filters][identity]
+        filters = (data['location'] == country)
+        if (self.filter_date):
+            date_filters = (data['location'] == country) & (data[identity] > 0)
+            dates = data[date_filters]['date']
+            selected_range = np.array([])
+            if len(dates) != 0:
+                first_date = dates[0]
+                filters = (data['location'] == country) & (data['date'] > first_date)
+            
+        selected_range = data[filters][identity]
         return selected_range
 
     def read_file(self):
+        if not os.path.exists("./" + self.file_name) or  not os.path.isfile("./" + self.file_name):
+            dd = data_downloader.DataDownloader()
+            dd.download()
         file = np.genfromtxt(self.file_name, delimiter=",", dtype=None, names=True, encoding='UTF-8')
         return file
 
